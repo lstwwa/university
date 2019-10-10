@@ -1,0 +1,146 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2013 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II 64-Bit
+# Version 13.0.0 Build 156 04/24/2013 SJ Full Version
+# Date created = 11:48:13  October 19, 2018
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		Cymometer_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone IV E"
+set_global_assignment -name DEVICE EP4CE10F17C8
+set_global_assignment -name TOP_LEVEL_ENTITY Cymometer_top
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:48:13  OCTOBER 19, 2018"
+set_global_assignment -name LAST_QUARTUS_VERSION 13.0
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 256
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 8
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (Verilog)"
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_location_assignment PIN_E1 -to Clk
+set_location_assignment PIN_E16 -to Rst_n
+set_location_assignment PIN_B6 -to Xsig
+set_location_assignment PIN_F6 -to SH_CP
+set_location_assignment PIN_B4 -to ST_CP
+set_location_assignment PIN_E6 -to DS
+set_location_assignment PIN_R1 -to cnt[0]
+set_location_assignment PIN_P2 -to cnt[1]
+set_location_assignment PIN_N2 -to cnt[2]
+set_location_assignment PIN_N1 -to cnt[3]
+set_location_assignment PIN_L2 -to cnt[4]
+set_location_assignment PIN_L1 -to cnt[5]
+set_location_assignment PIN_K2 -to cnt[6]
+set_location_assignment PIN_K1 -to cnt[7]
+set_location_assignment PIN_J2 -to cnt[8]
+set_location_assignment PIN_J1 -to cnt[9]
+set_location_assignment PIN_L6 -to cnt[10]
+set_location_assignment PIN_L3 -to cnt[11]
+set_location_assignment PIN_K6 -to cnt[12]
+set_location_assignment PIN_L4 -to cnt[13]
+set_location_assignment PIN_K5 -to cnt[14]
+set_location_assignment PIN_J6 -to cnt[15]
+set_location_assignment PIN_G5 -to cnt[16]
+set_location_assignment PIN_F3 -to cnt[17]
+set_location_assignment PIN_G1 -to cnt[18]
+set_location_assignment PIN_G2 -to cnt[19]
+set_location_assignment PIN_F2 -to cnt[20]
+set_location_assignment PIN_F5 -to cnt[21]
+set_location_assignment PIN_F1 -to cnt[22]
+set_location_assignment PIN_D1 -to cnt[23]
+set_location_assignment PIN_E5 -to cnt[24]
+set_location_assignment PIN_D3 -to cnt[25]
+set_location_assignment PIN_B1 -to cnt[26]
+set_location_assignment PIN_C2 -to cnt[27]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DS
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to Rst_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SH_CP
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ST_CP
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to Xsig
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[27]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[26]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[25]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[24]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[23]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[22]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[21]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[20]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[19]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[18]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[17]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[16]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[15]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[14]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[13]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[12]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[11]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[10]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[9]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[8]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to cnt[0]
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name VERILOG_FILE ../core/counter.v
+set_global_assignment -name QIP_FILE ../core/mult.qip
+set_global_assignment -name QIP_FILE ../core/fp2int.qip
+set_global_assignment -name QIP_FILE ../core/fp_conv.qip
+set_global_assignment -name QIP_FILE ../core/div.qip
+set_global_assignment -name VERILOG_FILE ../testbench/Cymometer_tb.v
+set_global_assignment -name VERILOG_FILE ../testbench/bin_to_bcd_tb.v
+set_global_assignment -name VERILOG_FILE ../rtl/HEX8.v
+set_global_assignment -name VERILOG_FILE ../rtl/HEX_top.v
+set_global_assignment -name VERILOG_FILE ../rtl/HC595_Driver.v
+set_global_assignment -name VERILOG_FILE ../rtl/gate_gen.v
+set_global_assignment -name VERILOG_FILE ../rtl/Cymometer.v
+set_global_assignment -name VERILOG_FILE ../rtl/bin_to_BCD.v
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
+set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH Cymometer_tb -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_NAME Cymometer_tb -section_id eda_simulation
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id Cymometer_tb
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME Cymometer_tb -section_id Cymometer_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE ../testbench/Cymometer_tb.v -section_id Cymometer_tb
+set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -to Xsig
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

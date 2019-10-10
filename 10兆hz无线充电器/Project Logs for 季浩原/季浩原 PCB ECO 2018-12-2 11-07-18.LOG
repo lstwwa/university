@@ -1,0 +1,7 @@
+Removed Pin From Net: NetName=GND Pin=P4-2
+Removed Pin From Net: NetName=GND Pin=P?-2
+Removed Pin From Net: NetName=GND Pin=Q?-1
+Removed Pin From Net: NetName=VCC Pin=Q?-1
+Removed Member From Class: ClassName=¼¾ºÆÔ­-1712220203 Member=P4
+Removed Member From Class: ClassName=¼¾ºÆÔ­-1712220203 Member=P?
+Removed Member From Class: ClassName=¼¾ºÆÔ­-1712220203 Member=Q?

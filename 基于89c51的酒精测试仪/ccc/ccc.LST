@@ -1,0 +1,384 @@
+C51 COMPILER V9.54   CCC                                                                   05/07/2019 00:21:24 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE CCC
+OBJECT MODULE PLACED IN ccc.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ccc.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include <reg52.h>           //µ÷ÓÃµ¥Æ¬»úÍ·ÎÄ¼þ
+   2          #define uchar unsigned char  //ÎÞ·ûºÅ×Ö·ûÐÍ ºê¶¨Òå  ±äÁ¿·¶Î§0~255
+   3          #define uint  unsigned int   //ÎÞ·ûºÅÕûÐÍ ºê¶¨Òå  ±äÁ¿·¶Î§0~65535
+   4          uchar a_a;
+   5          #include <intrins.h>
+   6          #define pulse0832()_nop_();_nop_();CLK=1;_nop_();_nop_();CLK=0
+   7          
+   8          
+   9          //ÊýÂë¹Ü¶ÎÑ¡¶¨Òå      0     1    2    3    4    5  6   7    8    9  
+  10          uchar code smg_du[]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71
+  11          };   //¶ÏÂë
+  12          
+  13          //ÊýÂë¹ÜÎ»Ñ¡¶¨Òå
+  14          uchar code smg_we[]={0x7F,0xBF,0xDF,0xEF};
+  15          uchar dis_smg[]  = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71
+  16          };  
+  17          uchar smg_i = 4;    //ÏÔÊ¾ÊýÂë¹ÜµÄ¸öÎ»Êý
+  18          
+  19          sbit CS=P3^2;   //CS¶¨ÒåÎªP1¿ÚµÄµÚ4Î»½Å£¬Á¬½ÓADC0832CS½Å
+  20          sbit CLK=P3^3;    //CL¶¨ÒåÎªP1¿ÚµÄµÚ3Î»½Å£¬Á¬½ÓADC0832SCL½Å
+  21          sbit DI=P3^4;
+  22          sbit DO=P3^4;   //DO¶¨ÒåÎªP1¿ÚµÄµÚ4Î»½Å£¬Á¬½ÓADC0832DO½Å
+  23          
+  24          sbit beep = P3^6;   //·äÃùÆ÷IO¿Ú¶¨Òå
+  25          long dengji,s_dengji ;     //¾Æ¾«µÈ¼¶
+  26          
+  27          bit flag_300ms = 1;
+  28          uchar menu_1;        //²Ëµ¥Éè¼ÆµÄ±äÁ¿
+  29          
+  30          #define RdCommand 0x01 //¶¨ÒåISPµÄ²Ù×÷ÃüÁî
+  31          #define PrgCommand 0x02
+  32          #define EraseCommand 0x03 
+  33          #define Error 1
+  34          #define Ok 0
+  35          #define WaitTime 0x01 //¶¨ÒåCPUµÄµÈ´ýÊ±¼ä
+  36          sfr ISP_DATA=0xe2;  //¼Ä´æÆ÷ÉêÃ÷
+  37          sfr ISP_ADDRH=0xe3;
+  38          sfr ISP_ADDRL=0xe4;                      
+  39          sfr ISP_CMD=0xe7;
+  40          sfr ISP_TRIG=0xe6;
+  41          sfr ISP_CONTR=0xe5;
+  42          
+  43          /* ================ ´ò¿ª ISP,IAP ¹¦ÄÜ ================= */
+  44          void ISP_IAP_enable(void)
+  45          {
+  46   1         EA = 0;       /* ¹ØÖÐ¶Ï   */
+  47   1         ISP_CONTR = ISP_CONTR & 0x18;       /* 0001,1000 */
+  48   1         ISP_CONTR = ISP_CONTR | WaitTime; /* Ð´ÈëÓ²¼þÑÓÊ± */
+  49   1         ISP_CONTR = ISP_CONTR | 0x80;       /* ISPEN=1  */
+  50   1      }
+  51          /* =============== ¹Ø±Õ ISP,IAP ¹¦ÄÜ ================== */
+  52          void ISP_IAP_disable(void)
+  53          {
+  54   1         ISP_CONTR = ISP_CONTR & 0x7f; /* ISPEN = 0 */
+  55   1         ISP_TRIG = 0x00;
+C51 COMPILER V9.54   CCC                                                                   05/07/2019 00:21:24 PAGE 2   
+
+  56   1         EA   =   1;   /* ¿ªÖÐ¶Ï */
+  57   1      }
+  58          /* ================ ¹«ÓÃµÄ´¥·¢´úÂë ==================== */
+  59          void ISPgoon(void)
+  60          {
+  61   1         ISP_IAP_enable();   /* ´ò¿ª ISP,IAP ¹¦ÄÜ */
+  62   1         ISP_TRIG = 0x46;  /* ´¥·¢ISP_IAPÃüÁî×Ö½Ú1 */
+  63   1         ISP_TRIG = 0xb9;  /* ´¥·¢ISP_IAPÃüÁî×Ö½Ú2 */
+  64   1         _nop_();
+  65   1      }
+  66          /* ==================== ×Ö½Ú¶Á ======================== */
+  67          unsigned char byte_read(unsigned int byte_addr)
+  68          {
+  69   1        EA = 0;
+  70   1         ISP_ADDRH = (unsigned char)(byte_addr >> 8);/* µØÖ·¸³Öµ */
+  71   1         ISP_ADDRL = (unsigned char)(byte_addr & 0x00ff);
+  72   1         ISP_CMD   = ISP_CMD & 0xf8;   /* Çå³ýµÍ3Î»  */
+  73   1         ISP_CMD   = ISP_CMD | RdCommand; /* Ð´Èë¶ÁÃüÁî */
+  74   1         ISPgoon();       /* ´¥·¢Ö´ÐÐ  */
+  75   1         ISP_IAP_disable();    /* ¹Ø±ÕISP,IAP¹¦ÄÜ */
+  76   1         EA  = 1;
+  77   1         return (ISP_DATA);    /* ·µ»Ø¶Áµ½µÄÊý¾Ý */
+  78   1      }
+  79          /* ================== ÉÈÇø²Á³ý ======================== */
+  80          void SectorErase(unsigned int sector_addr)
+  81          {
+  82   1         unsigned int iSectorAddr;
+  83   1         iSectorAddr = (sector_addr & 0xfe00); /* È¡ÉÈÇøµØÖ· */
+  84   1         ISP_ADDRH = (unsigned char)(iSectorAddr >> 8);
+  85   1         ISP_ADDRL = 0x00;
+  86   1         ISP_CMD = ISP_CMD & 0xf8;   /* Çå¿ÕµÍ3Î»  */
+  87   1         ISP_CMD = ISP_CMD | EraseCommand; /* ²Á³ýÃüÁî3  */
+  88   1         ISPgoon();       /* ´¥·¢Ö´ÐÐ  */
+  89   1         ISP_IAP_disable();    /* ¹Ø±ÕISP,IAP¹¦ÄÜ */
+  90   1      }
+  91          /* ==================== ×Ö½ÚÐ´ ======================== */
+  92          void byte_write(unsigned int byte_addr, unsigned char original_data)
+  93          {
+  94   1         EA  = 0;
+  95   1         SectorErase(byte_addr);
+  96   1         ISP_ADDRH = (unsigned char)(byte_addr >> 8);  /* È¡µØÖ·  */
+  97   1         ISP_ADDRL = (unsigned char)(byte_addr & 0x00ff);
+  98   1         ISP_CMD  = ISP_CMD | PrgCommand;  /* Ð´ÃüÁî2 */
+  99   1         ISP_DATA = original_data;   /* Ð´ÈëÊý¾Ý×¼±¸ */
+ 100   1         ISPgoon();       /* ´¥·¢Ö´ÐÐ  */
+ 101   1         ISP_IAP_disable();     /* ¹Ø±ÕIAP¹¦ÄÜ */
+ 102   1         EA =1;
+ 103   1      }
+ 104          
+ 105          
+ 106          /***********************1msÑÓÊ±º¯Êý*****************************/
+ 107          void delay_1ms(uint q)
+ 108          {
+ 109   1        uint i,j;
+ 110   1        for(i=0;i<q;i++)
+ 111   1          for(j=0;j<120;j++);
+ 112   1      }
+ 113          
+ 114          /******************°ÑÊý¾Ý´Óµ¥Æ¬»úÄÚ²¿eepromÖÐ¶Á³öÀ´*****************/
+ 115          void read_eeprom()   //¶Á³ö±£´æÊý¾Ý
+ 116          {
+ 117   1        s_dengji  = byte_read(0x2001);
+C51 COMPILER V9.54   CCC                                                                   05/07/2019 00:21:24 PAGE 3   
+
+ 118   1        s_dengji <<= 8;
+ 119   1        s_dengji  |= byte_read(0x2000);
+ 120   1        a_a      = byte_read(0x2058);
+ 121   1      }
+ 122          
+ 123          /******************°ÑÊý¾Ý±£´æµ½µ¥Æ¬»úÄÚ²¿eepromÖÐ******************/
+ 124          void write_eeprom() //±£´æÊý¾Ý
+ 125          {
+ 126   1        SectorErase(0x2000);
+ 127   1        byte_write(0x2000, s_dengji % 256);
+ 128   1        byte_write(0x2001, s_dengji / 256);
+ 129   1        byte_write(0x2058,a_a); 
+ 130   1      }
+ 131          
+ 132          /**************¿ª»ú×Ô¼ìeeprom³õÊ¼»¯*****************/
+ 133          void init_eeprom()   ////¿ªÊ¼³õÊ¼»¯±£´æµÄÊý¾Ý
+ 134          {
+ 135   1        read_eeprom();     //¶Á³ö±£´æÊý¾Ý
+ 136   1        if(a_a != 33)
+ 137   1        {
+ 138   2          a_a = 33;
+ 139   2          s_dengji = 80;
+ 140   2          write_eeprom();    //±£´æÊý¾Ý
+ 141   2        }
+ 142   1      }
+ 143          
+ 144          /***********¶ÁÊýÄ£×ª»»Êý¾Ý********************************************************/ 
+ 145          //ÇëÏÈÁË½âADC0832Ä£Êý×ª»»µÄ´®ÐÐÐ­Òé£¬ÔÙÀ´¶Á±¾º¯Êý£¬Ö÷ÒªÊÇ¶ÔÓ¦Ê±ÐòÍ¼À´Àí½â£¬±¾º¯ÊýÊÇÄ£Äâ0832µÄ´®ÐÐÐ­Òé½øÐÐµ
+             -Ä
+ 146                      //  1  0  0 Í¨µÀ
+ 147                      //  1  1  1 Í¨µÀ 
+ 148          unsigned char ad0832read()
+ 149          {
+ 150   1        unsigned char i=0,ch=0,ch1=0;   
+ 151   1          CS=0;
+ 152   1          DI=1;
+ 153   1        pulse0832();    //¿ªÊ¼
+ 154   1          DI=1;
+ 155   1          pulse0832();    //µÚÒ»¸öÉÏÉýÑØ  
+ 156   1          DI=0;
+ 157   1          pulse0832();
+ 158   1          DI=1;     //µÚÈý¸öÏÂ½µÑØ
+ 159   1          for(i=0;i<8;i++)
+ 160   1          {
+ 161   2            pulse0832(); //¿ªÊ¼´ÓµÚËÄ¸öÏÂ½µÑØ½ÓÊÕÊý¾Ý
+ 162   2            ch<<=1;
+ 163   2            if(DO==1)
+ 164   2              ch|=0x01;           
+ 165   2          }
+ 166   1          for(i=0;i<8;i++)
+ 167   1          {     //½ÓÊÕÐ£ÑéÊý¾Ý
+ 168   2            ch1>>=1;
+ 169   2            if(DO==1)
+ 170   2              ch1|=0x80;
+ 171   2            pulse0832();
+ 172   2          }
+ 173   1          CS=1; 
+ 174   1          return(ch==ch1)?ch:0;       //ÓëÐ£ÑéÊý¾Ý±È½Ï£¬ÕýÈ·¾Í·µ»ØÊý¾Ý£¬·ñÔò·µ»Ø0 
+ 175   1        
+ 176   1      
+ 177   1      }
+ 178          
+C51 COMPILER V9.54   CCC                                                                   05/07/2019 00:21:24 PAGE 4   
+
+ 179          /********************¶ÀÁ¢°´¼ü³ÌÐò*****************/
+ 180          uchar key_can;   //°´¼üÖµ
+ 181          
+ 182          void key()   //¶ÀÁ¢°´¼ü³ÌÐò
+ 183          {
+ 184   1        static uchar key_new;
+ 185   1        key_can = 20;                   //°´¼üÖµ»¹Ô­
+ 186   1        P2 |= 0x0f;         //°Ñ°´¼üµÄIO¿ÚÊä³öÎª¸ßµçÆ½
+ 187   1        if((P2 & 0x0f) != 0x0f)   //°´¼ü°´ÏÂ
+ 188   1        {
+ 189   2          delay_1ms(1);       //°´¼üÏû¶¶¶¯
+ 190   2          if(((P2 & 0x0f) != 0x0f) && (key_new == 1))
+ 191   2          {           //È·ÈÏÊÇ°´¼ü°´ÏÂ
+ 192   3            key_new = 0;
+ 193   3            switch(P2 & 0x0f)
+ 194   3            {
+ 195   4              case 0x0e: key_can = 3; break;     //µÃµ½k1¼üÖµ
+ 196   4              case 0x0d: key_can = 2; break;     //µÃµ½k2¼üÖµ
+ 197   4              case 0x0b: key_can = 1; break;     //µÃµ½k3¼üÖµ
+ 198   4      //        case 0x07: key_can = 4; break;     //µÃµ½k4¼üÖµ
+ 199   4            }
+ 200   3          }     
+ 201   2        }
+ 202   1        else 
+ 203   1          key_new = 1;  
+ 204   1      }
+ 205          
+ 206          
+ 207          
+ 208          /****************°´¼ü´¦ÀíÊýÂë¹ÜÏÔÊ¾º¯Êý***************/
+ 209          void key_with()
+ 210          {
+ 211   1        if(key_can == 1)       //ÉèÖÃ¼ü
+ 212   1        {
+ 213   2          menu_1 ++;
+ 214   2          if(menu_1 >= 2)
+ 215   2          {
+ 216   3            menu_1 = 0;
+ 217   3          }
+ 218   2        }
+ 219   1        if(menu_1 == 1)     //ÉèÖÃ¾Æ¾«±¨¾¯Öµ
+ 220   1        {
+ 221   2          smg_i = 4;        //ÏÔÊ¾4Î»ÊýÂë¹Ü
+ 222   2          if(key_can == 2)
+ 223   2          {
+ 224   3            s_dengji ++ ;    //¼Ó1 
+ 225   3            if(s_dengji > 500)
+ 226   3              s_dengji = 500;
+ 227   3          }
+ 228   2          if(key_can == 3)
+ 229   2          {
+ 230   3            s_dengji -- ;   //¼õ1 
+ 231   3            if(s_dengji <= 1)
+ 232   3              s_dengji = 1;
+ 233   3          }
+ 234   2          dis_smg[0] = smg_du[s_dengji % 10];            //È¡¸öÎ»ÏÔÊ¾
+ 235   2          dis_smg[1] = smg_du[s_dengji / 10 % 10] ;      //È¡Ê®Î»ÏÔÊ¾
+ 236   2          dis_smg[2] = smg_du[s_dengji / 100 % 10] ;     //
+ 237   2          dis_smg[3] = 0x05;   //a
+ 238   2          write_eeprom(); //±£´æÊý¾Ý
+ 239   2        } 
+ 240   1      }  
+C51 COMPILER V9.54   CCC                                                                   05/07/2019 00:21:24 PAGE 5   
+
+ 241          
+ 242          
+ 243          /***********************ÊýÂëÏÔÊ¾º¯Êý*****************************/
+ 244          void display()
+ 245          {
+ 246   1        static uchar i; 
+ 247   1        P1 = 0x00;       //ÏûÒþ                   
+ 248   1        P2 = smg_we[i];      //Î»Ñ¡
+ 249   1        P1 = dis_smg[i];     //¶ÎÑ¡    
+ 250   1        i ++;
+ 251   1        if(i >= smg_i)
+ 252   1          i = 0;    
+ 253   1      }
+ 254          
+ 255          
+ 256          /*************¶¨Ê±Æ÷0³õÊ¼»¯³ÌÐò***************/
+ 257          void time_init()    
+ 258          {
+ 259   1        EA   = 1;     //¿ª×ÜÖÐ¶Ï
+ 260   1        TMOD = 0X01;    //¶¨Ê±Æ÷0¡¢¶¨Ê±Æ÷1¹¤×÷·½Ê½1
+ 261   1        ET0  = 1;     //¿ª¶¨Ê±Æ÷0ÖÐ¶Ï 
+ 262   1        TR0  = 1;     //ÔÊÐí¶¨Ê±Æ÷0¶¨Ê±
+ 263   1      }
+ 264          
+ 265          
+ 266          
+ 267          /****************±¨¾¯º¯Êý***************/
+ 268          void clock_h_l()
+ 269          {
+ 270   1        static uchar value;
+ 271   1        if((dengji >= s_dengji))    //±¨¾¯
+ 272   1        {
+ 273   2          value ++;
+ 274   2          if(value >= 2)
+ 275   2          {
+ 276   3            value = 10;
+ 277   3            beep = ~beep;   //·äÃùÆ÷±¨¾¯
+ 278   3          }
+ 279   2        }else 
+ 280   1        {
+ 281   2          if((dengji < s_dengji))   //È¡Ïû±¨¾¯
+ 282   2          {
+ 283   3            value = 0;
+ 284   3            beep = 1;
+ 285   3          } 
+ 286   2        }
+ 287   1      
+ 288   1      }
+ 289          
+ 290          /****************Ö÷º¯Êý***************/
+ 291          void main()
+ 292          {
+ 293   1        beep = 0;                   //¿ª»ú½ÐÒ»Éù   
+ 294   1        delay_1ms(150);
+ 295   1        P0 = P1 = P2 = P3 = 0xff;   //µ¥Æ¬»úIO¿Ú³õÊ¼»¯Îª1
+ 296   1        time_init();        //³õÊ¼»¯¶¨Ê±Æ÷ 
+ 297   1        init_eeprom();              //¿ªÊ¼³õÊ¼»¯±£´æµÄÊý¾Ý
+ 298   1        while(1)
+ 299   1        {
+ 300   2          key();          //¶ÀÁ¢°´¼ü³ÌÐò
+ 301   2          if(key_can < 10)
+ 302   2          {
+C51 COMPILER V9.54   CCC                                                                   05/07/2019 00:21:24 PAGE 6   
+
+ 303   3            key_with();     //°´¼ü°´ÏÂÒªÖ´ÐÐµÄ³ÌÐò
+ 304   3          }
+ 305   2          if(flag_300ms == 1)
+ 306   2          {   
+ 307   3            flag_300ms = 0;
+ 308   3            clock_h_l();
+ 309   3            dengji = ad0832read();  
+ 310   3            dengji = dengji * 450 / 255.0;
+ 311   3              dengji = dengji - 100;              //Ê×ÏÈ¼õÈ¥ÁãµãÆ¯ÒÆ£¬Ò»°ãÊÇ100mV
+ 312   3            if(dengji < 0)
+ 313   3            {
+ 314   4              dengji = 0; 
+ 315   4            } 
+ 316   3            
+ 317   3            dengji = dengji * 2;             //½«mV×ª±ä³Émg/L£¬ÏµÊýÐèÒªÐ£×¼   
+ 318   3                        //µçÑ¹Ã¿Éý¸ß0.1V£¬Êµ¼Ê±»²âÆøÌåµÄÅ¨¶ÈÔö¼Ó20ppm 
+ 319   3                        //1ppm=1mg/kg=1mg/L=1¡Á10-6 ³£ÓÃÀ´±íÊ¾ÆøÌåÅ¨¶È£¬»òÕßÈÜÒºÅ¨¶È¡£       
+ 320   3            if(menu_1 == 0)
+ 321   3            {
+ 322   4              if(dengji >= 1000)
+ 323   4                smg_i = 4;
+ 324   4              else 
+ 325   4                smg_i = 3;
+ 326   4              dis_smg[3]=smg_du[dengji/1000%10];  //Ç§Î»
+ 327   4              dis_smg[2]=smg_du[dengji/100%10]; //°ÙÎ»
+ 328   4              dis_smg[1]=smg_du[dengji/10%10];  //Ê®Î»
+ 329   4              dis_smg[0]=smg_du[dengji%10];     //¸öÎ»  ADC0832Îª8Î»ADC£¬ÊýÖµÎª0~255£¬ÎÒÃÇ½«Æä·Ö¿ª·ÅÈël_tmpdateÊý×éÖÐ
+             -ÏÔÊ¾
+ 330   4            }
+ 331   3          } 
+ 332   2        }
+ 333   1      }
+ 334          
+ 335          /*************¶¨Ê±Æ÷0ÖÐ¶Ï·þÎñ³ÌÐò***************/
+ 336          void time0_int() interrupt 1
+ 337          { 
+ 338   1        static uchar value;
+ 339   1        TH0 = 0xf8;
+ 340   1        TL0 = 0x30;     // 2ms
+ 341   1        display();
+ 342   1        value ++;  
+ 343   1        if(value % 150 == 0)
+ 344   1        {
+ 345   2          flag_300ms = 1;    //300ms
+ 346   2          value = 0;                                                            
+ 347   2        }
+ 348   1      
+ 349   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1248    ----
+   CONSTANT SIZE    =     20    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     32    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,340 @@
+C51 COMPILER V9.54   ______                                                                05/08/2019 09:11:39 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE ______
+OBJECT MODULE PLACED IN ÎÂ¶È¼Æ.OBJ
+COMPILER INVOKED BY: D:\keil5\C51\BIN\C51.EXE ÎÂ¶È¼Æ.C OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include <intrins.h>
+   3          #define  uchar  unsigned  char 
+   4          #define  uint   unsigned  int
+   5          sbit  DATA = P1^1; //DS18B20½ÓÈë¿Ú
+   6          uchar code table[]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71};//¹²Ò
+             -õ¼«×ÖÐÍÂë
+   7          int temp;  //ÎÂ¶ÈÖµ
+   8          int ss;   //ÖÐ¼äµÄÒ»¸ö±äÁ¿
+   9          int dd;
+  10          int j;
+  11          uchar data b;//¶¨Ê±Æ÷ÖÐ¶Ï´ÎÊý
+  12          uchar data buf[4];//×ÖÐÍÏÔÊ¾ÖÐ¼ä±äÁ¿
+  13          int alarmH=350;   //Ä¬ÈÏ±¨¾¯Öµ
+  14          int alarmL=-100;
+  15          //¶¨Òå¿ª¹ØµÄ½ÓÈë¿Ú
+  16          sbit  k1=P2^5;//+
+  17          sbit  k2=P2^6;//-
+  18          sbit  k3=P2^7;//È·ÈÏ
+  19          sbit  k4=P2^4; //ÇÐ»»
+  20          sbit  bell=P1^0; //·äÃùÆ÷
+  21          sbit  HLight=P1^2; //ÕýÎÂÖ¸Ê¾µÆ
+  22          sbit  LLight=P1^3; //¸ºÎÂ¶ÈÖ¸Ê¾µÆ
+  23          sbit  warn=P1^4;  //±¨¾¯Ö¸Ê¾µÆ
+  24          sbit  Red=P1^6;   //ÎÂ¶ÈÉÏÏÞÉèÖÃÖ¸Ê¾µÆ
+  25          sbit  Green=P1^7; //ÎÂ¶ÈÏÂÏÞÉèÖÃÖ¸Ê¾µÆ
+  26          bit set=0;  //³õÊ¼»¯
+  27          bit Flag=0; //ÉèÖÃ±êÖ¾
+  28          int n;
+  29          //º¯ÊýµÄÉùÃ÷Çø
+  30          void key_to1();
+  31          void key_to2();
+  32          void delay(uint); 
+  33          void key();
+  34          void Show();
+  35          //º¯ÊýµÄ¶¨ÒåÇø
+  36          /*ÑÓÊ±×Óº¯Êý*/
+  37          void delay(uint num)
+  38          {
+  39   1        while(num--) ;
+  40   1      }
+  41          
+  42          //DS18b20ÎÂ¶È´«¸ÐÆ÷ËùÐèº¯Êý£¬·ÖÎª³õÊ¼»¯£¬¶ÁÐ´×Ö½Ú£¬¶ÁÈ¡ÎÂ¶È4¸öº¯Êý
+  43          Init_DS18B20(void)       //´«¸ÐÆ÷³õÊ¼»¯
+  44          {
+  45   1        uchar x=0;
+  46   1        DATA = 1;    //DQ¸´Î»
+  47   1        delay(10);  //ÉÔ×öÑÓÊ±
+  48   1        DATA = 0;    //µ¥Æ¬»ú½«DQÀ­µÍ
+  49   1        delay(80); //¾«È·ÑÓÊ± ´óÓÚ 480us    //450
+  50   1        DATA = 1;    //À­¸ß×ÜÏß
+  51   1        delay(20);
+  52   1        x=DATA;      //ÉÔ×öÑÓÊ±ºó Èç¹ûx=0Ôò³õÊ¼»¯³É¹¦ x=1Ôò³õÊ¼»¯Ê§°Ü
+  53   1        delay(30);
+  54   1      }
+C51 COMPILER V9.54   ______                                                                05/08/2019 09:11:39 PAGE 2   
+
+  55          ReadOneChar(void)  //¶ÁÒ»¸ö×Ö½Ú
+  56          {
+  57   1        uchar i=0;
+  58   1        uchar dat = 0;
+  59   1        for (i=8;i>0;i--)
+  60   1        {
+  61   2            DATA = 0; // ¸øÂö³åÐÅºÅ
+  62   2            dat>>=1;
+  63   2            DATA = 1; // ¸øÂö³åÐÅºÅ
+  64   2            if(DATA)
+  65   2            dat|=0x80;
+  66   2            delay(8);
+  67   2        }
+  68   1        return(dat);
+  69   1      }
+  70          WriteOneChar(unsigned char dat) //Ð´Ò»¸ö×Ö½Ú
+  71          {
+  72   1        uchar i=0;
+  73   1        for (i=8; i>0; i--)
+  74   1        {
+  75   2            DATA = 0;
+  76   2            DATA = dat&0x01;
+  77   2          delay(10);
+  78   2          DATA = 1;
+  79   2          dat>>=1;
+  80   2        }
+  81   1        delay(8);
+  82   1      }
+  83          int ReadTemperature(void) //¶ÁÈ¡ÎÂ¶È
+  84          {
+  85   1        uchar a=0;
+  86   1        uchar b=0;
+  87   1        int t=0;
+  88   1        float tt=0;
+  89   1        Init_DS18B20();
+  90   1        WriteOneChar(0xCC); // Ìø¹ý¶ÁÐòºÅÁÐºÅµÄ²Ù×÷
+  91   1        WriteOneChar(0x44); // Æô¶¯ÎÂ¶È×ª»»
+  92   1        Init_DS18B20();
+  93   1        WriteOneChar(0xCC); //Ìø¹ý¶ÁÐòºÅÁÐºÅµÄ²Ù×÷
+  94   1        WriteOneChar(0xBE); //¶ÁÈ¡ÎÂ¶È¼Ä´æÆ÷µÈ£¨¹²¿É¶Á9¸ö¼Ä´æÆ÷£© Ç°Á½¸ö¾ÍÊÇÎÂ¶È
+  95   1        a=ReadOneChar();//µÍÎ»
+  96   1        b=ReadOneChar();//¸ßÎ»
+  97   1        t=b;
+  98   1        t<<=8;
+  99   1        t=t|a;
+ 100   1        tt=t*0.0625;
+ 101   1        t= tt*10+0.5; 
+ 102   1        return(t);
+ 103   1      }
+ 104          void  display00()     //*********ÏÔÊ¾¸ºÖµ×Óº¯Êý
+ 105          { 
+ 106   1          dd=-(temp-1);
+ 107   1          buf[1]=dd/100;
+ 108   1        buf[2]=dd/100;
+ 109   1        buf[3]=dd%100/10;
+ 110   1        buf[0]=dd%10;
+ 111   1        //¶¯Ì¬ÏÔÊ¾
+ 112   1        for(j=0;j<5;j++)
+ 113   1          {
+ 114   2          P2=0xff;                  // ³õÊ¼µÆÎªÃðµÄ
+ 115   2          P0=0x00;
+ 116   2          P2=0xfd; //ÏÔÊ¾Ð¡Êýµã
+C51 COMPILER V9.54   ______                                                                05/08/2019 09:11:39 PAGE 3   
+
+ 117   2          P0=0x80; //ÏÔÊ¾Ð¡Êýµã
+ 118   2        delay(100);   
+ 119   2          P2=0xff;  // ³õÊ¼µÆÎªÃðµÄ
+ 120   2          P0=0x00;
+ 121   2          P2=0xf8; //Æ¬Ñ¡LCD1
+ 122   2          P0=0x40;
+ 123   2        delay(100);
+ 124   2          P2=0xff;
+ 125   2          P0=0x00;
+ 126   2          P2=0xf4;  //Æ¬Ñ¡LCD2
+ 127   2          P0=table[buf[2]];
+ 128   2        delay(100);
+ 129   2          P2=0xff;
+ 130   2          P0=0x00;
+ 131   2          P2=0Xf2;//Æ¬Ñ¡LCD3
+ 132   2          P0=table[buf[3]];
+ 133   2        delay(100);
+ 134   2          P2=0xff;
+ 135   2          P0=0x00;
+ 136   2          P2=0Xf1;
+ 137   2          P0=table[buf[0]];     //Æ¬Ñ¡LCD4  
+ 138   2        delay(100);
+ 139   2        P2=0xff;   
+ 140   2          }
+ 141   1      }
+ 142          //ÏÔÊ¾ÕýÖµ×Óº¯Êý
+ 143          void  display()
+ 144          {   
+ 145   1        buf[1]=temp/1000;//ÏÔÊ¾°ÙÎ»
+ 146   1        buf[2]=temp/100%10;//ÏÔÊ¾Ê®Î»
+ 147   1        buf[3]=temp%100/10;//ÏÔÊ¾¸öÎ»
+ 148   1        buf[0]=temp%10; //Ð¡ÊýÎ»
+ 149   1        for(j=0;j<3;j++) 
+ 150   1        {
+ 151   2        P2=0xff;                  // ³õÊ¼µÆÎªÃðµÄ
+ 152   2          P0=0x00;
+ 153   2        P2=0xfd; //ÏÔÊ¾Ð¡Êýµã
+ 154   2        P0=0x80; //ÏÔÊ¾Ð¡Êýµã
+ 155   2        delay(300);   
+ 156   2          P2=0xff;                  // ³õÊ¼µÆÎªÃðµÄ
+ 157   2          P0=0x00;
+ 158   2          P2=0xf7;                  //Æ¬Ñ¡LCD1
+ 159   2          P0=table[buf[1]];
+ 160   2        delay(300);
+ 161   2        P2=0xff;
+ 162   2          P0=0x00;
+ 163   2          P2=0xfb;                 //Æ¬Ñ¡LCD2
+ 164   2          P0=table[buf[2]];
+ 165   2        delay(300);
+ 166   2        P2=0xff;
+ 167   2          P0=0x00;
+ 168   2        P2=0Xfd;      //Æ¬Ñ¡LCD3
+ 169   2        P0=table[buf[3]];
+ 170   2        delay(300);
+ 171   2        P2=0xff;
+ 172   2          P0=0x00;
+ 173   2        P2=0Xfe;
+ 174   2        P0=table[buf[0]];     //Æ¬Ñ¡LCD4  
+ 175   2        delay(300);
+ 176   2        P2=0xff;
+ 177   2        }
+ 178   1      }
+C51 COMPILER V9.54   ______                                                                05/08/2019 09:11:39 PAGE 4   
+
+ 179          void key()  //°´¼üÉ¨Ãè×Ó³ÌÐò
+ 180          {   if(k1!=1)
+ 181   1        {
+ 182   2           delay(20);
+ 183   2           if(k1!=1)
+ 184   2           {
+ 185   3          while(k1!=1)
+ 186   3            { key_to1();
+ 187   4              for(n=0;n<8;n++)
+ 188   4              Show();
+ 189   4               }
+ 190   3           }
+ 191   2        }
+ 192   1        if(k2!=1)
+ 193   1        {
+ 194   2          delay(20);
+ 195   2          if(k2!=1)
+ 196   2          {
+ 197   3            while(k2!=1)
+ 198   3            { key_to2(); 
+ 199   4              for(n=0;n<8;n++)
+ 200   4                Show();
+ 201   4            }
+ 202   3            
+ 203   3          }
+ 204   2        }  
+ 205   1        if(k3!=1)
+ 206   1        { TR0=1; //¸´Î»£¬¿ª¶¨Ê±
+ 207   2              temp=ReadTemperature();
+ 208   2        }
+ 209   1        if(k4!=1)
+ 210   1        {  delay(20);
+ 211   2           if(k4!=1)
+ 212   2           {  while(k4!=1);
+ 213   3              set=!set;
+ 214   3             if(set==0)
+ 215   3             { Red=0;Green=1;}
+ 216   3             else { Green=0;Red=1;}
+ 217   3          }
+ 218   2         }
+ 219   1      }
+ 220          void key_to1()
+ 221          {
+ 222   1            TR0=0;         //¹Ø¶¨Ê±Æ÷
+ 223   1              temp+=10;
+ 224   1          if(temp>=1100)
+ 225   1             {temp=-550;}
+ 226   1              if(set==0)
+ 227   1          {alarmH=temp;}
+ 228   1          else {alarmL=temp;} 
+ 229   1      }
+ 230          void key_to2()
+ 231          {
+ 232   1            TR0=0;
+ 233   1             //¹Ø¶¨Ê±Æ÷
+ 234   1              temp-=10;
+ 235   1          if(temp<=-550)
+ 236   1              {temp=1100;}
+ 237   1              if(set==0)
+ 238   1          { alarmH=temp;}
+ 239   1          else { alarmL=temp;}
+ 240   1      }
+C51 COMPILER V9.54   ______                                                                05/08/2019 09:11:39 PAGE 5   
+
+ 241          
+ 242          void alarm(void)
+ 243          {
+ 244   1          if(temp>alarmH||temp<alarmL) 
+ 245   1        {   //bell=1;
+ 246   2            //delay(50);
+ 247   2          //bell=0;
+ 248   2          Flag=1;
+ 249   2           }else {Flag=0;}
+ 250   1      }
+ 251          
+ 252          logo()//¿ª»úµÄLogo  
+ 253          {   P0=0x40;
+ 254   1      
+ 255   1          P2=0xf7;
+ 256   1        delay(50);
+ 257   1          P2=0xfb;
+ 258   1        delay(50);
+ 259   1        P2=0Xfd;
+ 260   1        delay(50);
+ 261   1        P2=0Xfe;
+ 262   1        delay(50);
+ 263   1          P1 = 0xff;         //¹Ø±ÕÏÔÊ¾
+ 264   1      }
+ 265          
+ 266          void Show()  //ÏÔÊ¾º¯Êý,·Ö±ð±íÊ¾ÎÂ¶ÈÕý¸ºÖµ
+ 267          {     if(temp>=0)
+ 268   1          {HLight=1;LLight=0;display();}
+ 269   1          if(temp<0)
+ 270   1          {HLight=0;LLight=1;display00();}
+ 271   1      }
+ 272          void  main()
+ 273          { 
+ 274   1          TCON=0x01; //¶¨Ê±Æ÷T0¹¤×÷ÔÚ01Ä£Ê½ÏÂ
+ 275   1          TMOD=0X01;  
+ 276   1        TH0=0XD8;//×°Èë³õÖµ
+ 277   1        TL0=0XF0;
+ 278   1        EA=1;  //¿ª×ÜÖÐ¶Ï
+ 279   1        ET0=1; //¿ªT0ÖÐ¶Ï
+ 280   1        TR0=1; //T0¿ªÊ¼ÔËÐÐ¼ÆÊý
+ 281   1        EX0=1; //¿ªÍâ²¿ÖÐ¶Ï0
+ 282   1        
+ 283   1        for(n=0;n<500;n++)//ÏÔÊ¾Æô¶¯LOGo"- - - -"
+ 284   1        {bell=1;warn=1;logo();}
+ 285   1         Red=0;
+ 286   1        while(1)
+ 287   1        {
+ 288   2            key(); 
+ 289   2          ss=ReadTemperature();
+ 290   2              Show();
+ 291   2          alarm();   //±¨¾¯º¯Êý
+ 292   2          if(Flag==1)
+ 293   2          {bell=!bell;
+ 294   3           warn=!warn;}  //·äÃùÆ÷µÎµÎÏì
+ 295   2          else {bell=1;
+ 296   3                warn=1;}  
+ 297   2        }  
+ 298   1      }
+ 299           void time0(void) interrupt 1 using 1  //Ã¿¸ô10msÖ´ÐÐÒ»´Î´Ë×Ó³ÌÐò
+ 300           {  TH0=0X56;
+ 301   1        TL0=0XDC; 
+ 302   1        temp=ss;
+C51 COMPILER V9.54   ______                                                                05/08/2019 09:11:39 PAGE 6   
+
+ 303   1       }
+*** WARNING C290 IN LINE 54 OF ÎÂ¶È¼Æ.C: missing return value
+*** WARNING C290 IN LINE 82 OF ÎÂ¶È¼Æ.C: missing return value
+*** WARNING C290 IN LINE 264 OF ÎÂ¶È¼Æ.C: missing return value
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1063    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     19       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

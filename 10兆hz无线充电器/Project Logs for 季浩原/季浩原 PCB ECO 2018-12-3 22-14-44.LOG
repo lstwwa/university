@@ -1,0 +1,15 @@
+Change Component Footprint: Designator=C4 Old Footprint=MELF2 New Footprint=MLL34
+Change Component Footprint: Designator=L1 Old Footprint=SMB New Footprint=MELF2
+Change Component Footprint: Designator=R1 Old Footprint=SMB New Footprint=MELF2
+Change Component Footprint: Designator=R2 Old Footprint=SMB New Footprint=MELF2
+Change Component Footprint: Designator=R3 Old Footprint=SMB New Footprint=MELF2
+Change Component Footprint: Designator=C1 Old Footprint=SMB New Footprint=MLL34
+Change Component Footprint: Designator=C2 Old Footprint=SMB New Footprint=MLL34
+Change Component Footprint: Designator=C3 Old Footprint=SMB New Footprint=MLL34
+Change Component Footprint: Designator=D1 Old Footprint=SMB New Footprint=MLL34
+Change Component Footprint: Designator=D2 Old Footprint=SMB New Footprint=MLL34
+Change Component Footprint: Designator=D3 Old Footprint=SMB New Footprint=MLL34
+Change Component Footprint: Designator=D4 Old Footprint=SMB New Footprint=MLL34
+Change Component Footprint: Designator=D5 Old Footprint=SMB New Footprint=MLL34
+Change Component Footprint: Designator=U1 Old Footprint=SO8_N New Footprint=SO-8
+Added Room: Name=¼¾ºÆÔ­-1712220203

@@ -1,0 +1,208 @@
+C51 COMPILER V9.54   FRECOUNTMAIN                                                          11/22/2018 19:56:23 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE FRECOUNTMAIN
+OBJECT MODULE PLACED IN .\Objects\freCountMain.obj
+COMPILER INVOKED BY: D:\keil\C51\BIN\C51.EXE freCountMain.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings
+                    -\freCountMain.lst) TABS(2) OBJECT(.\Objects\freCountMain.obj)
+
+line level    source
+
+   1          /*************************************************************************
+   2          *名称：频率计
+   3          *说明：实现0~5000hz频率计的统计
+   4          *作者：季浩原
+   5          *时间：11-8
+   6          *学号：1712220203
+   7          *主程序
+   8          *************************************************************************/
+   9          #include "target.h"
+  10          #include "led.h"
+  11          //#define delay_time 25000
+  12          sbit bee=P2^1;
+  13          sbit ledunwork=P2^3;
+  14          sbit ledwork=P2^2;
+  15          void INIT(void)
+  16          {
+  17   1      
+  18   1      }
+  19          uchar displayBuff[4]={'0','0','0','0'}; //数码管显示缓冲区,千,百,十,个
+  20          const uchar displayMode=0x00;           //后四位分别对应缓冲区中每位的数据类型,1为任意字符显示,0为数字显示
+  21          void main()
+  22          {
+  23   1        uint get_fre;
+  24   1        target_init();
+  25   1        init_led();
+  26   1        sei();
+  27   1        while(1)
+  28   1        {
+  29   2          get_fre=get_fre_number();
+  30   2          
+  31   2        if(get_fre/1000<0x01)                                                                                    
+             -//0-1000
+  32   2        {
+  33   3        get_fre=get_fre;
+  34   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+  35   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+  36   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+  37   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+  38   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+  39   3        ledunwork=1;
+  40   3        ledwork=0;
+  41   3        bee=1;
+  42   3        }
+  43   2        
+  44   2        if(get_fre/1000>=0x01&&get_fre/1000<0x02)                                                                
+             -                 //1000-2000
+  45   2        {
+  46   3          get_fre=get_fre-85;
+  47   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+  48   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+  49   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+  50   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+  51   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+  52   3        ledunwork=1;
+C51 COMPILER V9.54   FRECOUNTMAIN                                                          11/22/2018 19:56:23 PAGE 2   
+
+  53   3        ledwork=0;
+  54   3        bee=1;
+  55   3        }
+  56   2      
+  57   2        if(get_fre/1000>=0x02&&get_fre/1000<0x03)                                                               /
+             -/ 2000-3000
+  58   2        {
+  59   3          get_fre=get_fre-170;
+  60   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+  61   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+  62   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+  63   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+  64   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+  65   3        ledwork=0;
+  66   3        ledunwork=1;
+  67   3        bee=0;
+  68   3        }
+  69   2        
+  70   2        if(get_fre/1000>=0x03&&get_fre/1000<0x04)                                                               /
+             -/ 3000-4000
+  71   2        {
+  72   3          get_fre=get_fre-255;
+  73   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+  74   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+  75   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+  76   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+  77   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+  78   3        ledwork=0;
+  79   3        ledunwork=1;
+  80   3        bee=0;
+  81   3        }
+  82   2        
+  83   2          if(get_fre/1000>=0x04&&get_fre/1000<0x05)                                                               
+             -// 4000-5000
+  84   2        {
+  85   3          get_fre=get_fre-340;
+  86   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+  87   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+  88   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+  89   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+  90   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+  91   3        ledwork=0;
+  92   3        ledunwork=1;
+  93   3        bee=0;
+  94   3        }
+  95   2        
+  96   2          if(get_fre/1000>=0x05&&get_fre/1000<0x06)                                                               
+             -// 5000-6000
+  97   2        {
+  98   3          get_fre=get_fre-425;
+  99   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+ 100   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+ 101   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+ 102   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+ 103   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+ 104   3        ledwork=1;
+ 105   3        ledunwork=0;
+ 106   3        bee=0;
+ 107   3        }
+ 108   2        
+ 109   2          if(get_fre/1000>=0x06&&get_fre/1000<0x07)                                                               
+             -// 6000-7000
+C51 COMPILER V9.54   FRECOUNTMAIN                                                          11/22/2018 19:56:23 PAGE 3   
+
+ 110   2        {
+ 111   3          get_fre=get_fre-510;
+ 112   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+ 113   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+ 114   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+ 115   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+ 116   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+ 117   3        ledwork=1;
+ 118   3        ledunwork=0;
+ 119   3        bee=0;
+ 120   3        }
+ 121   2        
+ 122   2          if(get_fre/1000>=0x07&&get_fre/1000<0x08)                                                               
+             -// 7000-8000
+ 123   2        {
+ 124   3          get_fre=get_fre-595;
+ 125   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+ 126   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+ 127   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+ 128   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+ 129   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+ 130   3        ledwork=1;
+ 131   3        ledunwork=0;
+ 132   3        bee=0;
+ 133   3        }
+ 134   2        
+ 135   2          if(get_fre/1000>=0x08&&get_fre/1000<0x09)                                                               
+             -// 8000-9000
+ 136   2        {
+ 137   3          get_fre=get_fre-680;
+ 138   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+ 139   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+ 140   3        displayBuff[2]=(get_fre%100)/10+'0';          //计算频率十位,放在缓冲区第2位
+ 141   3        displayBuff[3]=get_fre%10+'0';              //计算频率个位,放在缓冲区第3位
+ 142   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+ 143   3        ledwork=1;
+ 144   3        ledunwork=0;
+ 145   3        bee=0;
+ 146   3        }
+ 147   2        
+ 148   2        
+ 149   2        
+ 150   2        if(get_fre/1000>=0x09)                                                                                  /
+             -/>9000
+ 151   2        {
+ 152   3        get_fre=get_fre-765;
+ 153   3        displayBuff[0]=get_fre/1000+'0';            //计算频率千位,放在缓冲区第0位
+ 154   3        displayBuff[1]=(get_fre/100)%10+'0';          //计算频率百位,放在缓冲区第1位
+ 155   3        displayBuff[2]=(get_fre%100)/10+'0';         //计算频率十位,放在缓冲区第2位
+ 156   3        displayBuff[3]=get_fre%10+'0';            //计算频率个位,放在缓冲区第3位
+ 157   3        ledSweepDisplay(displayBuff,displayMode,0x04);//循环显示数码管缓冲区中数据
+ 158   3        ledunwork=1;
+ 159   3        ledwork=0;
+ 160   3        bee=0;
+ 161   3        }
+ 162   2        
+ 163   2      
+ 164   2      
+ 165   2        } 
+ 166   1      
+ 167   1      }
+ 168          
+C51 COMPILER V9.54   FRECOUNTMAIN                                                          11/22/2018 19:56:23 PAGE 4   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1427    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
